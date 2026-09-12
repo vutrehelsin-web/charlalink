@@ -1,0 +1,10 @@
+﻿.venice-form {
+  width: 320px;
+  padding: 20px;
+  border-right: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  min-height: 450px;
+}

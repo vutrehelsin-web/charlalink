@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat Privado</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💬</text></svg>">
+</head>
+<body>
+  <!-- Pantalla de login -->
+  <div id="login-screen" class="login-screen">
+    <div class="login-container">
+      <div class="login-logo">
+        <span class="logo-icon">💬</span>
+        <h1>Chat Privado</h1>
+        <p>Conecta de forma segura y privada</p>
+      </div>
+
+      <!-- Tabs para crear/unirse/foros -->
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="create">🏠 Crear Sala</button>
+        <button class="tab-btn" data-tab="join">🔗 Unirse</button>
+        <button class="tab-btn" data-tab="forums">📢 Foros</button>
+      </div>
+
+      <!-- Formulario crear sala -->
+      <div id="tab-create" class="tab-content active">
+        <form id="create-room-form">
+          <div class="input-group-vertical">
+            <div class="profile-section">
+              <div class="profile-avatar-container">
+                <button type="button" id="profile-avatar" class="profile-avatar" data-avatar="😀">😀</button>
+                <div id="avatar-picker" class="avatar-picker"></div>
+              </div>
+              <input type="text" id="profile-bio" placeholder="Tu bio (opcional)" maxlength="100">
+            </div>
+            <input type="text" id="create-username" placeholder="Tu nombre de usuario" maxlength="20" required>
+            <input type="text" id="room-name" placeholder="Nombre de la sala (opcional)" maxlength="30">
+            <button type="submit" class="btn-join btn-full">
+              <span>Crear Sala</span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 5v14M5 12h14"/>
+              </svg>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Formulario unirse -->
+      <div id="tab-join" class="tab-content">
+        <form id="join-room-form">
+          <div class="input-group-vertical">
+            <input type="text" id="join-username" placeholder="Tu nombre de usuario" maxlength="20" required>
+            <input type="text" id="room-id" placeholder="Código de sala (ej: ABC123)" maxlength="6" style="text-transform: uppercase;" required>
+            <button type="submit" class="btn-join btn-full">
+              <span>Unirse</span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Sección Foros -->
+      <div id="tab-forums" class="tab-content">
+        <div class="forum-tabs">
+          <button class="forum-tab-btn active" data-tab="browse">🔍 Explorar</button>
+          <button class="forum-tab-btn" data-tab="create-forum">➕ Crear Foro</button>
+        </div>
+
+        <!-- Explorar foros -->
+        <div id="forum-tab-browse" class="forum-tab-content active">
+          <div id="forum-categories" class="forum-categories"></div>
+          <div id="forums-list" class="forums-list"></div>
+        </div>
+
+        <!-- Crear foro -->
+        <div id="forum-tab-create-forum" class="forum-tab-content">
+          <form id="create-forum-form" class="create-forum-form">
+            <div class="input-group-vertical">
+              <input type="text" id="forum-name" placeholder="Nombre del foro" maxlength="40" required>
+              <textarea id="forum-desc" placeholder="Descripción del foro (opcional)" maxlength="200" rows="2"></textarea>
+              <select id="forum-category" required></select>
+              <button type="submit" class="btn-join btn-full">
+                <span>Crear Foro</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 5v14M5 12h14"/>
+                </svg>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="login-features">
+        <div class="feature">
+          <span>🔒</span>
+          <span>Privado</span>
+        </div>
+        <div class="feature">
+          <span>⚡</span>
+          <span>Tiempo real</span>
+        </div>
+        <div class="feature">
+          <span>👤</span>
+          <span>Perfiles</span>
+        </div>
+        <div class="feature">
+          <span>📢</span>
+          <span>Foros</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Aplicación principal -->
+  <div id="app" class="app hidden">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h2 id="room-title">💬 Chat</h2>
+        <div class="room-code-container">
+          <span class="room-code-label">Código:</span>
+          <span id="room-code" class="room-code">-</span>
+          <button id="btn-copy-link" class="btn-copy" title="Copiar enlace">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+              <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="users-section">
+        <h3>Usuarios conectados</h3>
+        <ul id="users-list"></ul>
+      </div>
+      <div class="sidebar-actions">
+        <button id="btn-share-screen" class="action-btn" title="Compartir pantalla">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="3" width="20" height="14" rx="2"/>
+            <path d="M8 21h8M12 17v4"/>
+          </svg>
+          <span>Compartir pantalla</span>
+        </button>
+        <button id="btn-stop-share" class="action-btn hidden" title="Detener pantalla">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="3" width="20" height="14" rx="2"/>
+            <path d="M8 21h8M12 17v4"/>
+            <line x1="1" y1="1" x2="23" y2="23" stroke="#e74c3c"/>
+          </svg>
+          <span>Detener</span>
+        </button>
+        <button id="btn-leave-room" class="action-btn btn-leave" title="Salir de la sala">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+          <span>Salir</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Área principal -->
+    <main class="main-content">
+      <!-- Header -->
+      <header class="chat-header">
+        <div class="header-info">
+          <h1 id="chat-title">Sala Privada</h1>
+          <span id="connection-status" class="status connected">Conectado</span>
+        </div>
+        <div class="header-actions">
+          <button id="btn-venice" class="icon-btn" title="Generar imagen con IA">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+              <path d="M2 17l10 5 10-5"/>
+              <path d="M2 12l10 5 10-5"/>
+            </svg>
+          </button>
+          <button id="btn-clear-chat" class="icon-btn" title="Limpiar chat">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- Barra de llamada -->
+      <div id="call-bar" class="call-bar">
+        <div class="call-icon"></div>
+        <span class="call-text" id="call-text">En llamada</span>
+        <div class="call-participants" id="call-participants"></div>
+        <div class="call-controls">
+          <button id="btn-mute" class="call-btn mute" title="Silenciar">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/>
+              <path d="M19 10v2a7 7 0 01-14 0v-2"/>
+              <line x1="12" y1="19" x2="12" y2="23"/>
+              <line x1="8" y1="23" x2="16" y2="23"/>
+            </svg>
+          </button>
+          <button id="btn-hangup" class="call-btn hangup" title="Colgar">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10.68 13.31a16 16 0 003.41 2.6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7 2 2 0 011.72 2v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.42 19.42 0 01-6-6 19.79 19.79 0 01-3.07-8.63A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91"/>
+              <line x1="1" y1="1" x2="23" y2="23" stroke="#fff"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Contenedor de pantalla compartida -->
+      <div id="screen-share-container" class="screen-share-container hidden">
+        <div class="screen-share-header">
+          <span id="screen-share-info">Alguien está compartiendo pantalla</span>
+          <button id="btn-close-screen" class="icon-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+        <video id="shared-screen-video" autoplay playsinline></video>
+      </div>
+
+      <!-- Mensajes -->
+      <div id="messages" class="messages"></div>
+
+      <!-- Indicador de escritura -->
+      <div id="typing-indicator" class="typing-indicator hidden">
+        <span class="typing-dots">
+          <span></span>
+          <span></span>
+          <span></span>
+        </span>
+        <span id="typing-text">Alguien está escribiendo...</span>
+      </div>
+
+      <!-- Input de mensajes -->
+      <div class="input-area">
+        <div class="input-wrapper">
+          <button id="btn-attach" class="input-btn" title="Adjuntar archivo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>
+            </svg>
+          </button>
+          <input type="file" id="file-input" hidden multiple>
+          <input type="text" id="message-input" placeholder="Escribe un mensaje..." maxlength="1000">
+          <button id="btn-record" class="input-btn" title="Grabar mensaje de voz">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/>
+              <path d="M19 10v2a7 7 0 01-14 0v-2"/>
+              <line x1="12" y1="19" x2="12" y2="23"/>
+              <line x1="8" y1="23" x2="16" y2="23"/>
+            </svg>
+          </button>
+          <button id="btn-send" class="btn-send" title="Enviar">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="22" y1="2" x2="11" y2="13"/>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+          </button>
+        </div>
+        <div id="recording-indicator" class="recording-indicator hidden">
+          <span class="recording-dot"></span>
+          <span id="recording-time">0:00</span>
+          <button id="btn-cancel-record" class="btn-cancel">Cancelar</button>
+          <button id="btn-stop-record" class="btn-stop-record">Enviar</button>
+        </div>
+      </div>
+    </main>
+    <!-- Panel derecho - Reproductor -->
+    <aside class="player-panel">
+      <div class="player-header">
+        <h2 id="panel-title">🎬 Reproductor</h2>
+        <button id="btn-toggle-player" class="icon-btn" title="Minimizar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="18 15 12 9 6 15"/>
+          </svg>
+        </button>
+      </div>
+      <div class="player-content">
+        <!-- Tabs -->
+        <div class="panel-tabs">
+          <button class="panel-tab active" data-tab="video">🎬 Video</button>
+          <button class="panel-tab" data-tab="image">🎨 Imágenes</button>
+        </div>
+
+        <!-- Video Panel -->
+        <div id="tab-video" class="panel-tab-content active">
+          <div class="player-video-container">
+            <iframe id="player-iframe" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <div id="player-placeholder" class="player-placeholder">
+              <span class="placeholder-icon">🎬</span>
+              <p>Agrega un enlace de video</p>
+              <p class="placeholder-hint">YouTube, Vimeo, enlaces directos</p>
+            </div>
+          </div>
+          <div class="player-controls">
+            <div class="add-link-form">
+              <input type="text" id="video-url-input" placeholder="Pega el enlace del video...">
+              <button id="btn-add-video" class="btn-add-video" title="Agregar video">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 5v14M5 12h14"/>
+                </svg>
+              </button>
+            </div>
+            <div class="playlist-header">
+              <h3>Lista de reproducción</h3>
+              <span id="playlist-count" class="playlist-count">0 videos</span>
+            </div>
+            <ul id="playlist" class="playlist"></ul>
+          </div>
+        </div>
+
+        <!-- Image Generator Panel -->
+        <div id="tab-image" class="panel-tab-content">
+          <div class="image-generator">
+            <div class="image-gen-form">
+              <textarea id="image-prompt" placeholder="Describe la imagen que quieres generar...&#10;&#10;Ej: Un paisaje futurista con neón y montañas" rows="3"></textarea>
+              <div class="image-gen-options">
+                <select id="image-model">
+                  <option value="flux-dev">Flux Dev (Rápido)</option>
+                  <option value="flux-dev-uncensored">Flux Dev Uncensored</option>
+                  <option value="qwen-turbo">Qwen Turbo</option>
+                  <option value="sd3.5">Stable Diffusion 3.5</option>
+                </select>
+                <select id="image-size">
+                  <option value="512x512">512x512</option>
+                  <option value="768x768">768x768</option>
+                  <option value="1024x1024" selected>1024x1024</option>
+                  <option value="1024x1536">1024x1536</option>
+                  <option value="1536x1024">1536x1024</option>
+                </select>
+              </div>
+              <button id="btn-generate-image" class="btn-generate-image">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                  <path d="M2 17l10 5 10-5"/>
+                  <path d="M2 12l10 5 10-5"/>
+                </svg>
+                Generar Imagen
+              </button>
+            </div>
+            <div class="image-gen-result" id="image-gen-result">
+              <div class="image-gen-placeholder">
+                <span class="placeholder-icon">🎨</span>
+                <p>Genera imágenes con IA</p>
+                <p class="placeholder-hint">Powered by Venice.ai</p>
+              </div>
+            </div>
+            <div class="image-gen-history" id="image-gen-history">
+              <h3>Historial</h3>
+              <div class="image-history-list" id="image-history-list"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Modal de imagen -->
+  <div id="image-modal" class="modal hidden">
+    <div class="modal-content">
+      <button id="btn-close-modal" class="modal-close">&times;</button>
+      <img id="modal-image" src="" alt="Imagen">
+    </div>
+  </div>
+
+  <!-- Modal de video -->
+  <div id="video-modal" class="video-modal">
+    <div class="video-modal-content">
+      <button class="video-modal-close">&times;</button>
+      <div id="video-modal-player"></div>
+    </div>
+  </div>
+
+  <!-- Modal Venice.ai - Generador de Imágenes -->
+  <div id="venice-modal" class="venice-modal">
+    <div class="venice-modal-content">
+      <button class="venice-modal-close">&times;</button>
+      <div class="venice-header">
+        <h2>🎨 Generador de Imágenes</h2>
+        <span class="venice-powered">Powered by Venice.ai</span>
+      </div>
+      <div class="venice-body">
+        <div class="venice-form">
+          <textarea id="venice-prompt" placeholder="Describe la imagen que quieres generar...&#10;&#10;Ej: Un gato astronauta flotando en el espacio con nebulosas de fondo" rows="3"></textarea>
+          <div class="venice-options">
+            <div class="venice-option">
+              <label>Modelo</label>
+              <select id="venice-model">
+                <option value="flux-dev">Flux Dev (Rápido)</option>
+                <option value="flux-dev-uncensored">Flux Dev Uncensored</option>
+                <option value="qwen-turbo">Qwen Turbo</option>
+                <option value="sd3.5">Stable Diffusion 3.5</option>
+              </select>
+            </div>
+            <div class="venice-option">
+              <label>Tamaño</label>
+              <select id="venice-size">
+                <option value="512x512">512x512</option>
+                <option value="768x768">768x768</option>
+                <option value="1024x1024" selected>1024x1024</option>
+                <option value="1024x1536">1024x1536 (Vertical)</option>
+                <option value="1536x1024">1536x1024 (Horizontal)</option>
+              </select>
+            </div>
+            <div class="venice-option">
+              <label>Estilo</label>
+              <select id="venice-style">
+                <option value="">Ninguno</option>
+                <option value="photorealistic">Fotorealista</option>
+                <option value="anime">Anime</option>
+                <option value="oil painting">Óleo</option>
+                <option value="cyberpunk">Cyberpunk</option>
+                <option value="watercolor">Acuarela</option>
+                <option value="pixel art">Pixel Art</option>
+                <option value="3d render">3D Render</option>
+              </select>
+            </div>
+          </div>
+          <textarea id="venice-negative" placeholder="Prompt negativo (qué evitar en la imagen)..." rows="2"></textarea>
+          <button id="btn-venice-generate" class="btn-venice-generate">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+              <path d="M2 17l10 5 10-5"/>
+              <path d="M2 12l10 5 10-5"/>
+            </svg>
+            Generar Imagen
+          </button>
+        </div>
+        <div class="venice-result" id="venice-result">
+          <div class="venice-placeholder">
+            <span class="placeholder-icon">🎨</span>
+            <p>Escribe un prompt y genera tu imagen</p>
+          </div>
+        </div>
+      </div>
+      <div class="venice-actions" id="venice-actions" style="display: none;">
+        <button id="venice-regenerate" class="venice-action-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M1 4v6h6M23 20v-6h-6"/>
+            <path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/>
+          </svg>
+          Regenerar
+        </button>
+        <button id="venice-send-chat" class="venice-action-btn venice-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="22" y1="2" x2="11" y2="13"/>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+          Enviar al Chat
+        </button>
+        <button id="venice-download" class="venice-action-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Descargar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notificaciones -->
+  <div id="notifications" class="notifications"></div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
