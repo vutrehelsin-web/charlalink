@@ -1,4 +1,4 @@
-﻿# 💬 Chat Privado con Supabase
+# 💬 Chat Privado con Supabase
 
 Aplicación de chat privada local con tema oscuro/rojo, soporte para pantalla, audio, multimedia y almacenamiento en la nube con Supabase.
 
