@@ -1,4 +1,4 @@
-﻿const express = require('express');
+const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const multer = require('multer');
@@ -563,21 +563,6 @@ function getLocalIP() {
   return 'localhost';
 }
 
-server.listen(PORT, () => {
-  const localIP = getLocalIP();
-  console.log('\n🚀 Chat Privado iniciado\n');
-  console.log(`📱 Accede localmente: http://localhost:${PORT}`);
-  console.log(`🌐 Comparte este enlace: http://${localIP}:${PORT}`);
-  console.log('\n✨ Características:');
-  console.log('   💬 Chat en tiempo real');
-  console.log('   🏠 Salas privadas con enlace único');
-  console.log('   👤 Perfiles de usuario');
-  console.log('   📢 Foros de debate temáticos');
-  console.log('   🖥️ Compartir pantalla');
-  console.log('   🎙️ Mensajes de voz');
-  console.log('   📁 Compartir archivos');
-  console.log('   🎨 Tema oscuro/rojo\n');
-});
 
 // ========================================
 // PERFILES DE USUARIO - API
@@ -717,4 +702,19 @@ app.get('/api/forums/:forumId/messages', (req, res) => {
   const { forumId } = req.params;
   const history = messageHistory.get(forumId) || [];
   res.json({ success: true, messages: history });
+});
+server.listen(PORT, () => {
+  const localIP = getLocalIP();
+  console.log('\n🚀 Chat Privado iniciado\n');
+  console.log(`📱 Accede localmente: http://localhost:${PORT}`);
+  console.log(`🌐 Comparte este enlace: http://${localIP}:${PORT}`);
+  console.log('\n✨ Características:');
+  console.log('   💬 Chat en tiempo real');
+  console.log('   🏠 Salas privadas con enlace único');
+  console.log('   👤 Perfiles de usuario');
+  console.log('   📢 Foros de debate temáticos');
+  console.log('   🖥️ Compartir pantalla');
+  console.log('   🎙️ Mensajes de voz');
+  console.log('   📁 Compartir archivos');
+  console.log('   🎨 Tema oscuro/rojo\n');
 });

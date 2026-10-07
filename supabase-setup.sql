@@ -1,4 +1,4 @@
-﻿-- ============================================
+-- ============================================
 -- Chat Privado - Esquema de Base de Datos
 -- Proyecto: nskjddeqvmwnsrnrdmbv
 -- Ejecuta este SQL en el Editor SQL de Supabase
